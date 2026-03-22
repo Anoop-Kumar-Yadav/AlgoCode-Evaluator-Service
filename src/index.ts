@@ -1,8 +1,13 @@
-import express, { Express } from "express";
-import serverConfig from "./config/serverConfig";
+import express, { Express } from 'express';
 
-const app: Express = express()
+import serverConfig from './config/serverConfig';
+import apiRouter from './routes';
 
-app.listen(serverConfig.PORT,() =>{
+const app: Express = express();
+
+app.use('/api', apiRouter);
+
+app.listen(serverConfig.PORT, () => {
+    // eslint-disable-next-line no-console
     console.log(`[SUCCESS] : Server is Up at https://localhost:${serverConfig.PORT}`);
-})
+});
