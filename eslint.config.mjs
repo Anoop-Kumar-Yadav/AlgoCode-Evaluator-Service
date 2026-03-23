@@ -27,7 +27,7 @@ export default [
         },
         rules: {
             // Logic & Formatting
-            'no-console': 'warn',
+            // 'no-console': 'warn',
             'eqeqeq': ['error', 'always'],
             'curly': ['error', 'all'],
             'prefer-const': 'error',
