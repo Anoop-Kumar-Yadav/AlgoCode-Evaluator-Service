@@ -1,10 +1,10 @@
 import express, { Express } from 'express';
 
 import serverConfig from './config/serverConfig';
-import produceSampleJob from './producers/sampleQueueProducer';
+// import produceSampleJob from './producers/sampleQueueProducer';
 import apiRouter from './routes';
 // Import the worker and producer
-import sampleWorker from './workers/sampleWorker';
+// import sampleWorker from './workers/sampleWorker';
 
 const app: Express = express();
 
@@ -19,13 +19,13 @@ app.listen(serverConfig.PORT, () => {
     console.log(`[SUCCESS] : Server is Up at http://localhost:${serverConfig.PORT}`);
 
     // 1. Initialize the BullMQ Worker to listen on 'SampleQueue'
-    sampleWorker('SampleQueue');
+    // sampleWorker('SampleQueue');
 
     // 2. Directly test the queue without waiting for an API request
-    console.log('\n[Direct Test] Pushing a test job to the queue in 2 seconds...');
+    // console.log('\n[Direct Test] Pushing a test job to the queue in 2 seconds...');
 
     // We use a slight timeout to ensure the worker is fully bound to Redis before producing
-    setTimeout(async () => {
+    /* setTimeout(async () => {
         try {
             const mockExecutionPayload = {
                 language: 'cpp',
@@ -37,5 +37,5 @@ app.listen(serverConfig.PORT, () => {
         } catch (error) {
             console.error('[Direct Test] Failed to produce job:', error);
         }
-    }, 2000);
+    }, 2000); */
 });
