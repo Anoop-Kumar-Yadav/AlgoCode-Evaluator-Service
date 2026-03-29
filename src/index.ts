@@ -1,8 +1,10 @@
 import express, { Express } from 'express';
 
 import serverConfig from './config/serverConfig';
+import runPython from './containers/runPythonDocker';
 // import produceSampleJob from './producers/sampleQueueProducer';
 import apiRouter from './routes';
+import { TestCase } from './types/testCases';
 // Import the worker and producer
 // import sampleWorker from './workers/sampleWorker';
 
@@ -17,7 +19,14 @@ app.use('/api', apiRouter);
 
 app.listen(serverConfig.PORT, () => {
     console.log(`[SUCCESS] : Server is Up at http://localhost:${serverConfig.PORT}`);
-
+    const code = `
+x = input()
+print(x)`;
+    const inputTestCase: TestCase = {
+        input: '100',
+        output: '100',
+    };
+    runPython(code, inputTestCase);
     // 1. Initialize the BullMQ Worker to listen on 'SampleQueue'
     // sampleWorker('SampleQueue');
 
