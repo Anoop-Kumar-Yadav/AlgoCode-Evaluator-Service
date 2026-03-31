@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 
 import serverConfig from './config/serverConfig';
+import runJava from './containers/runJavaDocker';
 import runPython from './containers/runPythonDocker';
 // import produceSampleJob from './producers/sampleQueueProducer';
 import apiRouter from './routes';
@@ -19,14 +20,35 @@ app.use('/api', apiRouter);
 
 app.listen(serverConfig.PORT, () => {
     console.log(`[SUCCESS] : Server is Up at http://localhost:${serverConfig.PORT}`);
-    const code = `
-x = input()
-print(x)`;
-    const inputTestCase: TestCase = {
-        input: '100',
-        output: '100',
-    };
-    runPython(code, inputTestCase);
+    const userPyCode = `
+    print(x)
+    `;
+    // stub code  ----> set by the problem setter
+    const PyCode = `
+def run(x = "unknown"):
+${userPyCode}
+
+X = input()
+run(X)
+    `;
+    runPython(PyCode, { input: 'anoop', output: 'anoop' });
+    const userJavaCode = `
+    Scanner scanner = new Scanner(System.in);
+    int x = scanner.nextInt();
+    System.out.println(x);
+    `;
+    // stub code  ----> set by the problem setter
+    const javaCode = `
+import java.util.Scanner;
+
+public class Main {
+    public static void main(String[] args) {
+        ${userJavaCode}
+    }
+}
+    `;
+
+    runJava(javaCode, { input: '100', output: '100' });
     // 1. Initialize the BullMQ Worker to listen on 'SampleQueue'
     // sampleWorker('SampleQueue');
 

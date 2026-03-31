@@ -2,10 +2,12 @@ import { TestCase } from '../types/testCases';
 import { PYTHON_IMAGE } from '../utils/constants';
 import createContainer from './containerFactory';
 import decodeDockerStream from './dockerHelper';
+import pullImage from './pullContainer';
 
 async function runPython(code: string, inputData: TestCase) {
     const runCommand = `echo '${code.replace(/'/g, `\\"`)}' > test.py && echo ${inputData?.input} | python3 test.py`;
 
+    await pullImage(PYTHON_IMAGE);
     const pythonDockerContainer = await createContainer(PYTHON_IMAGE, [
         '/bin/sh',
         '-c',

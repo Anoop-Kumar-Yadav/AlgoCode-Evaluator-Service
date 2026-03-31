@@ -1,4 +1,5 @@
 export const PYTHON_IMAGE = 'python:3.12-slim';
+export const JAVA_IMAGE = 'eclipse-temurin:21-jdk-alpine';
 
 // THIS WILL REPRESENT HEADER SIZE OF DOCKER STREAM
 // DOCKER STREAM HEADER WILL CONTAIN DATA ABOUT TYPES OF STREAM I.E stdout/stderr
