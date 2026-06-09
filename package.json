@@ -31,8 +31,11 @@
     "typescript-eslint": "^8.57.1"
   },
   "dependencies": {
+    "@bull-board/api": "^6.20.6",
+    "@bull-board/express": "^6.20.6",
     "@eslint/js": "^10.0.1",
     "@types/ioredis": "^4.28.10",
+    "bull-arena": "^4.9.2",
     "bullmq": "^5.71.0",
     "concurrently": "^9.2.1",
     "dockerode": "^4.0.10",

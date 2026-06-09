@@ -1,13 +1,18 @@
+// title Crisis Response Event-Driven Architecture
+import { createBullBoard } from '@bull-board/api';
+import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
+import { ExpressAdapter } from '@bull-board/express';
 import express, { Express } from 'express';
+import { unknown } from 'zod';
 
 import serverConfig from './config/serverConfig';
-import runJava from './containers/runJavaDocker';
-import runPython from './containers/runPythonDocker';
-// import produceSampleJob from './producers/sampleQueueProducer';
+import submissionQueueProducer from './producers/submissionQueueProducer';
+import { SampleQueue } from './queues/sampleQueue';
+// import { SubmissionQueue } from './queues/submissionQueue'; // Ensure you import your actual Queue object here!
 import apiRouter from './routes';
-import { TestCase } from './types/testCases';
-// Import the worker and producer
-// import sampleWorker from './workers/sampleWorker';
+import { SUBMISSION_QUEUE } from './utils/constants';
+import sampleWorker from './workers/sampleWorker';
+import submissionWorker from './workers/submissionQueueWorker';
 
 const app: Express = express();
 
@@ -15,30 +20,64 @@ const app: Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// --- BULL BOARD SETUP ---
+// 1. Initialize the Express adapter
+const serverAdapter = new ExpressAdapter();
+serverAdapter.setBasePath('/admin/queues');
+
+// 2. Attach your BullMQ queues to the board
+createBullBoard({
+    queues: [
+        new BullMQAdapter(SampleQueue),
+        // new BullMQAdapter(SubmissionQueue) // Uncomment once you import the actual SubmissionQueue object
+    ],
+    serverAdapter: serverAdapter,
+});
+
+// 3. Mount the UI route
+app.use('/admin/queues', serverAdapter.getRouter());
+// ------------------------
+
 // Register API routes
 app.use('/api', apiRouter);
 
 app.listen(serverConfig.PORT, () => {
     console.log(`[SUCCESS] : Server is Up at http://localhost:${serverConfig.PORT}`);
-    const userPyCode = `
+    console.log(
+        `[INFO]    : Bull Board UI available at http://localhost:${serverConfig.PORT}/admin/queues`,
+    );
+
+    sampleWorker('SampleQueue');
+    submissionWorker(SUBMISSION_QUEUE);
+    submissionQueueProducer({
+        '1234': {
+            language: 'CPP',
+            inputCase: `Hello World`,
+            code: `print("Hello World")`,
+        },
+    });
+
+    /* const userPyCode = `
     print(x)
-    `;
+    `; */
     // stub code  ----> set by the problem setter
-    const PyCode = `
+    /*  const PyCode = `
 def run(x = "unknown"):
 ${userPyCode}
 
 X = input()
 run(X)
-    `;
-    runPython(PyCode, { input: 'anoop', output: 'anoop' });
-    const userJavaCode = `
-    Scanner scanner = new Scanner(System.in);
-    int x = scanner.nextInt();
-    System.out.println(x);
-    `;
+    `; */
+    // runPython(PyCode, { input: 'anoop', output: 'anoop' });
+
+    // const userJavaCode = `
+    // Scanner scanner = new Scanner(System.in);
+    // int x = scanner.nextInt();
+    // System.out.println(x);
+    // `;
+
     // stub code  ----> set by the problem setter
-    const javaCode = `
+    /* const javaCode = `
 import java.util.Scanner;
 
 public class Main {
@@ -46,27 +85,7 @@ public class Main {
         ${userJavaCode}
     }
 }
-    `;
+    `; */
 
-    runJava(javaCode, { input: '100', output: '100' });
-    // 1. Initialize the BullMQ Worker to listen on 'SampleQueue'
-    // sampleWorker('SampleQueue');
-
-    // 2. Directly test the queue without waiting for an API request
-    // console.log('\n[Direct Test] Pushing a test job to the queue in 2 seconds...');
-
-    // We use a slight timeout to ensure the worker is fully bound to Redis before producing
-    /* setTimeout(async () => {
-        try {
-            const mockExecutionPayload = {
-                language: 'cpp',
-                code: '#include <iostream>\nusing namespace std;\nint main() {\n\tcout << "Direct test from index.ts successful!";\n\treturn 0;\n}',
-            };
-
-            // Pass 'SampleJob' as the job name and the mock data as the payload
-            await produceSampleJob('SampleJob', mockExecutionPayload);
-        } catch (error) {
-            console.error('[Direct Test] Failed to produce job:', error);
-        }
-    }, 2000); */
+    // runJava(javaCode, { input: '100', output: '100' });
 });
